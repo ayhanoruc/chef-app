@@ -16,8 +16,10 @@ class GZipedMiddleware(BaseHTTPMiddleware):
             receive_['body'] = data
         else:
             print("header not detected") 
-            pass 
-
+            data = receive_.get('body') 
+            receive_['body'] = data
+             
+ 
 
         async def receive() -> Message:
             return receive_
@@ -41,22 +43,22 @@ params= {
     "items":["tomato","potato","milk"] # can be empty
 }
 
+def find_recipe(params):
+    """
+    this should handle metadata filtering and similarity search
+    then returns the most relevant recipe for chatgpt to use
+    """
+    pass 
+
+
+
+
 @app.get("/home")
 async def test_endpoint():
 
     return {"message":"ok"}
 
-"""
-@app.post("/get-recipe")
-async def get_recipe(params:dict)->dict:
 
-    cusine = params['metadata']['cusine']
-    level = params['metadata']['level']
-    health = params['metadata']['health_n_wellness']
-    items = params['items']
-    response = f"you have asked a {level}, {health}, {cusine} meal,and you have the following items: {items}"
-
-    return {"response":response} """
 
 @app.route("/get-recipe",methods=["POST"])
 async def get_recipe(request:Request):
@@ -77,12 +79,17 @@ async def get_recipe(request:Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error occurred during processing the request")
 
+"""
+@app.post("/get-recipe")
+async def get_recipe(params:dict)->dict:
 
+    cusine = params['metadata']['cusine']
+    level = params['metadata']['level']
+    health = params['metadata']['health_n_wellness']
+    items = params['items']
+    response = f"you have asked a {level}, {health}, {cusine} meal,and you have the following items: {items}"
 
-
-
-
-
+    return {"response":response} """
 
 if __name__ == "__main__":
 
