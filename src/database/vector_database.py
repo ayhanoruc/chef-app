@@ -6,6 +6,7 @@ from langchain.vectorstores import Chroma
 from typing import List,Tuple ,Union, Any, Dict
 import os 
 import ast
+from src.database.document_generator import JsonToDocument
 
 
 
@@ -159,24 +160,48 @@ if __name__ == "__main__":
 
     persist_directory = os.path.join(r"C:\Users\ayhan\Desktop\ChefApp", "artifacts" ,"vector_db")
     os.makedirs(persist_directory, exist_ok=True)
-
     collection_name= "recipe_vdb"
-    PROJECT_ROOT = r"C:\Users\ayhan\Desktop\StriveMate"
 
     json_file_path = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\cusine\italian\italian-desserts.json"
-    
 
-    vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
+    vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=True)
     
-    json_to_document = JsonToDocument(vector_retriever)
+    json_to_document = JsonToDocument()
 
-    vector_retriever.initialize_vector_store(persist_directory=persist_directory, texts=actual_list, collection_name=collection_name)
+    #single document
+    #documents = json_to_document.process_json_document(file_path=json_file_path)
+
+    recipes_dir_1 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes"
+    recipes_dir_2 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\cusine"
+
+    categories_1 = os.listdir(recipes_dir_1)
+    categories_2 = os.listdir(recipes_dir_2)
+    documents = []
+
+    for category in categories_1:
+        file_names = [name for name in  os.listdir(os.path.join(recipes_dir_1,category)) if name.endswith(".json")]
+        print(category,"/////////////////////")
+        for file in file_names:
+            
+            json_file_path = os.path.join(recipes_dir_1,category,file)
+            documents.extend(json_to_document.process_json_document(file_path=json_file_path))
+
+    # recipes from cusine folder
+    for category in categories_2:
+        file_names = [name for name in  os.listdir(os.path.join(recipes_dir_2,category)) if name.endswith(".json")]
+        print(category,"/////////////////////")
+        for file in file_names:
+            
+            json_file_path = os.path.join(recipes_dir_2,category,file)
+            documents.extend(json_to_document.process_json_document(file_path=json_file_path))
+
+
+    print(len(documents),"documents found!", type(documents)) # created database from 12456 documents in 165 seconds. 
+
+    vector_retriever.initialize_vector_store(persist_directory=persist_directory, documents=documents, collection_name=collection_name)
     
     
-    
-    qry = "do you remember that you had suggested me a dinner and a pasta recipe. what were those recipes?"
-    response = vector_retriever.similarity_search(query=qry, k=3)
-    print(response)
+    print("DONE")
 
 
 

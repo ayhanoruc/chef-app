@@ -15,15 +15,18 @@ class JsonToDocument:
         Process a JSON document and return a list of Document objects.
         """ 
         # load the JSON data: list of recipe dictionaries
-        with open(self.file_path, 'r') as f:
+        
+        with open(file_path, 'r') as f:
             json_data = json.load(f)
         
+        print("ok")
         documents = []
 
         # Process each recipe in the JSON data
         for recipe in json_data:
-            metadata = extract_metadata(recipe)
-            ingredients_list = extract_ingredients_text(recipe)
+            metadata = self.extract_metadata(recipe)
+            print(type(metadata))
+            ingredients_list = self.extract_ingredients_text(recipe)
             ingredients_text = " ".join(ingredients_list) # concatenate list items to a string
             #ingredients_vector = vector_retriever.embedder.encode(ingredients_text)
             # Construct a new Document object
@@ -31,8 +34,10 @@ class JsonToDocument:
                 metadata=metadata,
                 page_content=ingredients_text,)
                 # add additional fields, if necessary
+            print(type(new_document))
             documents.append(new_document)
             # Insert metadata and vector into the vector database
+        print("Documents are generated successfully! # of documents: ", len(documents))
         return documents
 
     def extract_metadata(self, recipe: dict) -> dict:
@@ -47,19 +52,20 @@ class JsonToDocument:
         """Extract and concatenate ingredients text: list of dicts from a recipe."""
         # Concatenate ingredients into a single text string
         ingredients: List[dict] = recipe.get('recipe_ingredients', [])
-
+        ingredients = json.loads(ingredients)
         # Initialize an empty list to store only the values.
         final_ingredients_list = []
-
+        #print(ingredients, type(ingredients))
         for ingredient in ingredients: # here ingredient is a dictionary, bad naming...
 
             # This assumes that each ingredient dictionary has a 'recipe_ingredients' key.
+            #print(ingredient)
             ingredient_text = ingredient['recipe_ingredients']
             # Decode the Unicode escape sequences in the ingredient string.
             # The 'unicode-escape' codec decodes the string with escape sequences into the actual characters.
             decoded_ingredient_text = bytes(ingredient_text, 'utf-8').decode('unicode-escape')
             final_ingredients_list.append(decoded_ingredient_text)
 
-        print(final_ingredients_list)
+        #print(final_ingredients_list)
 
         return final_ingredients_list
