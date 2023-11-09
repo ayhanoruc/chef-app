@@ -6,10 +6,12 @@ import uvicorn
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import Message, ASGIApp
 
+import asyncio ## use this 
 
 class GZipedMiddleware(BaseHTTPMiddleware):
     async def set_body(self, request: Request):
         receive_ = await request._receive()
+        print(request.headers.items)
         if "gzip" in request.headers.getlist("Content-Encoding"):
             #print(receive_)                          
             data = gzip.decompress(receive_.get('body'))
@@ -61,7 +63,9 @@ async def test_endpoint():
 
 
 @app.route("/get-recipe",methods=["POST"])
-async def get_recipe(request:Request):
+async def get_recipe(request:Request,docs:None):
+    if docs:
+        print("DOCS")
     try:
         compressed_data = await request.body()
         params_str = compressed_data.decode("utf-8")

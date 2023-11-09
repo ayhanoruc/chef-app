@@ -24,3 +24,6 @@ def main():
     html = extract(URL)
     parse(html,'article')
 
+
+
+main()
