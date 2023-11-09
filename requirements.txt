@@ -6,3 +6,6 @@ openai
 python-multipart
 selectolax
 pandas 
+sentence-transformers
+langchain
+chromadb

@@ -1,2 +1,5 @@
 *env
 *_pycache_*
+*egg*
+*build*
+*dist*
