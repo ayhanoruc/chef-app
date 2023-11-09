@@ -38,6 +38,7 @@ class VectorRetriever:
         model_name=self.model_name,
         model_kwargs=self.model_kwargs,
         encode_kwargs=self.encode_kwargs)
+
         embedding_dimension = hf.dict()['client'][1].get_config_dict()["word_embedding_dimension"]
         print("embedder initialized with dimension: ", embedding_dimension)
 
@@ -68,10 +69,13 @@ class VectorRetriever:
                         collection_name= collection_name,
                         persist_directory=persist_directory)
 
+            self.vector_store.persist()
         
         else:
-            vectordb = Chroma(persist_directory=persist_directory, embedding_function=self.embedder)
-            self.vector_store = vectordb.as_retriever()
+            #vectordb:Chroma = Chroma(persist_directory=persist_directory, embedding_function=self.embedder)
+            self.vector_store = Chroma(persist_directory=persist_directory, embedding_function=self.embedder, collection_name=collection_name)
+            
+            
 
         print("vector store initialized successfully!")
 
@@ -92,15 +96,14 @@ class VectorRetriever:
         - List[Tuple[str, float]]: A list of tuples containing the similarity scores and their corresponding results.
         """
                 
-
-        
-
         if isinstance(query, list):
             query = "-".join(query) # concatenate list items to a string
 
         if isinstance(query, str):
-            results = self.vector_store.similarity_search_with_relevance_scores(query, k=k)
-            #return results
+            results = self.vector_store.similarity_search_with_relevance_scores(query, k=k) # ADD filter by metadata option
+            print(type(results))
+            return results
+
         else: 
             raise ValueError("query must be a string or a list of strings")
 
@@ -158,13 +161,13 @@ if __name__ == "__main__":
     encode_kwargs = {'normalize_embeddings': False}
 
 
-    persist_directory = os.path.join(r"C:\Users\ayhan\Desktop\ChefApp", "artifacts" ,"vector_db")
+    persist_directory = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\vector_db"
     os.makedirs(persist_directory, exist_ok=True)
     collection_name= "recipe_vdb"
 
     json_file_path = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\cusine\italian\italian-desserts.json"
 
-    vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=True)
+    vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
     
     json_to_document = JsonToDocument()
 
@@ -174,6 +177,7 @@ if __name__ == "__main__":
     recipes_dir_1 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes"
     recipes_dir_2 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\cusine"
 
+    """ 
     categories_1 = os.listdir(recipes_dir_1)
     categories_2 = os.listdir(recipes_dir_2)
     documents = []
@@ -197,10 +201,26 @@ if __name__ == "__main__":
 
 
     print(len(documents),"documents found!", type(documents)) # created database from 12456 documents in 165 seconds. 
+    """
 
-    vector_retriever.initialize_vector_store(persist_directory=persist_directory, documents=documents, collection_name=collection_name)
+    # since overwrite is set to False, it will initialize the vector store as retriever.pass documents=None
+    vector_retriever.initialize_vector_store(persist_directory=persist_directory, documents=None, collection_name=collection_name)
     
+    ingredients_list = ["2 cups of flour", "1 cup of sugar", "1 teaspoon of vanilla extract"]
+    search_query = ' '.join(ingredients_list)
     
+    results = vector_retriever.similarity_search(query=qry, k=10)
+    #we can use:  filter (Optional[Dict[str, str]]) – Filter by metadata. Defaults to None.
+    
+    #[result[0].page_content for result in results]
+    #result = list of tuples: each tuple contains a document and its similarity score,
+    # each document is a tuple of (page_content, metadata)
+    print([result[0].page_content for result in results] )
+    print("\n\n")
+    print(results[0][0].metadata.__dir__())
+    print(results[0][0].metadata.keys())
+    print(results[0][0].metadata.get("recipe_name"), end="\n")
+    print([result[0].metadata.get("recipe_card-href") for result in results])
     print("DONE")
 
 
