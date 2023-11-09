@@ -58,10 +58,114 @@ middle_eastern_single_urls = [
 ]
 
 
+japanese_single_urls = [
+  "https://www.allrecipes.com/recipes/17490/world-cuisine/asian/japanese/appetizers/",
+    "https://www.allrecipes.com/recipes/17491/world-cuisine/asian/japanese/main-dishes/",
+    "https://www.allrecipes.com/recipes/17492/world-cuisine/asian/japanese/soups-and-stews/"
+]
+#---------------------------------------------------------
+
+low_carb_maintag_urls = [
+  "https://www.allrecipes.com/recipes/1591/healthy-recipes/low-carb/main-dishes/",
+
+]
+low_carb_single_urls = [
+  "https://www.allrecipes.com/recipes/1594/healthy-recipes/low-carb/side-dishes/",
+  "https://www.allrecipes.com/recipes/1595/healthy-recipes/low-carb/appetizers/",
+  "https://www.allrecipes.com/recipes/1596/healthy-recipes/low-carb/desserts/",
+
+]
+
+breakfast_maintag_urls = [
+  "https://www.allrecipes.com/recipes/143/breakfast-and-brunch/drinks/",
+  "https://www.allrecipes.com/recipes/144/breakfast-and-brunch/breakfast-casseroles/",
+  "https://www.allrecipes.com/recipes/145/breakfast-and-brunch/cereals/",
+  "https://www.allrecipes.com/recipes/147/breakfast-and-brunch/crepes/",
+  "https://www.allrecipes.com/recipes/148/breakfast-and-brunch/eggs/",
+  "https://www.allrecipes.com/recipes/149/breakfast-and-brunch/french-toast/",
+  "https://www.allrecipes.com/recipes/151/breakfast-and-brunch/pancakes/",
+  "https://www.allrecipes.com/recipes/152/breakfast-and-brunch/potatoes/",
+  ""
+
+]
+
+breakfast_single_urls = [
+  "https://www.allrecipes.com/recipes/1316/breakfast-and-brunch/waffles/",
+  "https://www.allrecipes.com/recipes/17766/breakfast-and-brunch/breakfast-cookies/"
+]
 
 
+drinks_maintag_urls = [
+  "https://www.allrecipes.com/recipes/134/drinks/coffee/",
+  "https://www.allrecipes.com/recipes/136/drinks/punch/",
+  "https://www.allrecipes.com/recipes/137/drinks/shakes-and-floats/",
+  "https://www.allrecipes.com/recipes/138/drinks/smoothies/"
+]
 
-url = italian_urls[0]
+
+vegan_single_urls = [
+  "https://www.allrecipes.com/recipes/16570/everyday-cooking/vegan/soups-and-stews/",
+  "https://www.allrecipes.com/recipes/1661/everyday-cooking/vegan/main-dishes/",
+  "https://www.allrecipes.com/recipes/1663/everyday-cooking/vegan/side-dishes/",
+  "https://www.allrecipes.com/recipes/1664/everyday-cooking/vegan/desserts/",
+  "https://www.allrecipes.com/recipes/17093/everyday-cooking/vegan/breakfast-and-brunch/",
+
+]
+
+gluten_free_single_urls = [
+  "https://www.allrecipes.com/recipes/1696/healthy-recipes/gluten-free/main-dishes/",
+  "https://www.allrecipes.com/recipes/1697/healthy-recipes/gluten-free/appetizers/",
+  "https://www.allrecipes.com/recipes/1698/healthy-recipes/gluten-free/side-dishes/",
+  "https://www.allrecipes.com/recipes/1755/healthy-recipes/gluten-free/bread/",
+  "https://www.allrecipes.com/recipes/17685/healthy-recipes/gluten-free/breakfast-and-brunch/"
+]
+
+gluten_free_maintag_urls = [
+  "https://www.allrecipes.com/recipes/1695/healthy-recipes/gluten-free/desserts/"
+]
+
+
+healthy_single_urls = [
+  "https://www.allrecipes.com/recipes/12155/healthy-recipes/snacks/",
+  "https://www.allrecipes.com/recipes/1346/healthy-recipes/salads/",
+  "https://www.allrecipes.com/recipes/1319/healthy-recipes/appetizers/",
+  "https://www.allrecipes.com/recipes/1321/healthy-recipes/side-dishes/",
+  "https://www.allrecipes.com/recipes/15587/healthy-recipes/low-glycemic-impact/",
+  "https://www.allrecipes.com/recipes/16375/healthy-recipes/desserts/"
+
+]
+healthy_maintag_urls = [
+  "https://www.allrecipes.com/recipes/1231/healthy-recipes/low-fat/",
+  "https://www.allrecipes.com/recipes/1232/healthy-recipes/low-calorie/",
+  "https://www.allrecipes.com/recipes/738/healthy-recipes/dairy-free/",
+  "https://www.allrecipes.com/recipes/22959/healthy-recipes/keto-diet/",
+  "https://www.allrecipes.com/recipes/1320/healthy-recipes/main-dishes/",
+  "https://www.allrecipes.com/recipes/15334/healthy-recipes/breakfast-and-brunch/",
+  ""
+]
+
+
+dinner_maintag_urls = [
+  "https://www.allrecipes.com/recipes/475/meat-and-poultry/beef/steaks/",
+  "https://www.allrecipes.com/recipes/476/everyday-cooking/cooking-for-two/",
+  ""
+]
+dinner_single_urls = [
+  "https://www.allrecipes.com/recipes/15054/everyday-cooking/cooking-for-one/quick-and-easy/",
+  "https://www.allrecipes.com/recipes/22992/everyday-cooking/sheet-pan-dinners/",
+
+]
+
+desserts_maintag_urls = [
+  "https://www.allrecipes.com/recipes/1557/desserts/chocolate/",
+  "https://www.allrecipes.com/recipes/15840/desserts/crisps-and-crumbles/",
+  "https://www.allrecipes.com/recipes/17100/desserts/frostings-and-icings/",
+  "https://www.allrecipes.com/recipes/17140/desserts/fruit-desserts/",
+  "https://www.allrecipes.com/recipes/17203/desserts/specialty-desserts/",
+  "https://www.allrecipes.com/recipes/276/desserts/cakes/",
+  "https://www.allrecipes.com/recipes/363/desserts/custards-and-puddings/"
+]
+
 
 main_tag_sitemap = {
   "sitemap": {
@@ -256,7 +360,8 @@ single_url_sitemap = {
         "type": "SelectorGroup"
       }
     ]
-  }
+  
+}
 }
 
 
