@@ -3,7 +3,7 @@ recipe_name:
 metadata:
   cuisine: [Choose one of these: Italian Cuisine, Mexican Cuisine, Chinese Cuisine, ...]
   meal_type: [Choose one of these: Breakfast, Lunch, Dinner, Appetizers, Snacks, Desserts, Beverages, Baking]
-  dietary_type: [Choose one of these: "Vegetarian Cooking","Vegan Cooking","Gluten-Free Cooking","Keto Cooking","Paleo Cooking","Low-Carb Cooking","Dairy-Free Cooking","Nut-Free Cooking"]
+  dietary_type: [Choose one of these: "Vegetarian Cooking","Vegan Cooking","Gluten-Free Cooking","Keto Cooking","Paleo Cooking","Low-Carb Cooking","Dairy-Free Cooking"]
   health_and_wellness: [Choose one of these: "Heart-Healthy Cooking", "Low-Calorie Cooking", "High-Protein Recipes", "Weight-Loss-Friendly Recipes", "Plant-Based Nutrition"]
   cooking_skill_levels: [Choose one of these: Beginner-Friendly Recipes, Intermediate Cooking, Advanced Culinary Techniques]
   image_url: Image URL

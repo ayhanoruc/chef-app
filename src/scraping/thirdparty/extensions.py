@@ -4,6 +4,7 @@ recipe_websites = [
     "https://www.allrecipes.com/recipes-a-z-6735880", # allrecipes.com: a-z
     "https://www.allrecipes.com", # allrecipes.com for unique categorical search
     "https://www.foodnetwork.com", # for recipe categories.
+    "https://www.bbcgoodfood.com/recipes" # huge!!!
 ]
 italian_maintag_urls = [
     "https://www.allrecipes.com/recipes/16767/world-cuisine/european/italian/main-dishes/",
@@ -21,13 +22,51 @@ italian_single_urls = [
     "https://www.allrecipes.com/recipes/1800/world-cuisine/european/italian/salads/",
 ]
 
+mexican_maintag_urls = [
+  "https://www.allrecipes.com/recipes/1214/world-cuisine/latin-american/mexican/appetizers/",
+  "https://www.allrecipes.com/recipes/1215/world-cuisine/latin-american/mexican/soups-and-stews/",
+  "https://www.allrecipes.com/recipes/1217/world-cuisine/latin-american/mexican/desserts/",
+  "https://www.allrecipes.com/recipes/17504/world-cuisine/latin-american/mexican/main-dishes/"
+
+]
+mexican_single_urls = [
+  "https://www.allrecipes.com/recipes/1470/world-cuisine/latin-american/mexican/authentic/",
+  "https://www.allrecipes.com/recipes/17513/world-cuisine/latin-american/mexican/salads/",
+  "https://www.allrecipes.com/recipes/1216/world-cuisine/latin-american/mexican/main-dishes/burritos/"
+]
+
+chineese_maintag_urls = [
+  "https://www.allrecipes.com/recipes/17135/world-cuisine/asian/chinese/main-dishes/",
+
+]
+chineese_single_urls = [
+  "https://www.allrecipes.com/recipes/1899/world-cuisine/asian/chinese/appetizers/",
+  "https://www.allrecipes.com/recipes/1900/world-cuisine/asian/chinese/soups-and-stews/",
+  "https://www.allrecipes.com/recipes/22838/world-cuisine/asian/chinese/main-dishes/beef/",
+  "https://www.allrecipes.com/recipes/1902/world-cuisine/asian/chinese/main-dishes/chicken/",
+  "https://www.allrecipes.com/recipes/1901/world-cuisine/asian/chinese/main-dishes/pork/",
+  "https://www.allrecipes.com/recipes/1903/world-cuisine/asian/chinese/main-dishes/seafood/"
+]
+
+
+middle_eastern_single_urls = [
+  "https://www.allrecipes.com/recipes/15937/world-cuisine/middle-eastern/persian/",
+  "https://www.allrecipes.com/recipes/1824/world-cuisine/middle-eastern/lebanese/",
+  "https://www.allrecipes.com/recipes/1825/world-cuisine/middle-eastern/turkish/",
+  "https://www.allrecipes.com/recipes/1826/world-cuisine/middle-eastern/israeli/",
+  "https://www.allrecipes.com/recipes/16704/healthy-recipes/mediterranean-diet/"
+]
+
+
+
+
 
 url = italian_urls[0]
 
 main_tag_sitemap = {
   "sitemap": {
-    "_id": "Italian-drinks",
-    "startUrl": [url],
+    "_id": "Chinese-main_dishes",
+    "startUrl": ["https://www.allrecipes.com/recipes/17135/world-cuisine/asian/chinese/main-dishes/"],
     "selectors": [
       {
         "id": "sub_tag",
@@ -125,8 +164,8 @@ main_tag_sitemap = {
 }
 single_url_sitemap = {
 "sitemap": {
-    "_id": id,
-    "startUrl": [url],
+    "_id": "chineese-appetizers",
+    "startUrl": ["https://www.allrecipes.com/recipes/1899/world-cuisine/asian/chinese/appetizers/"],
     "selectors":[
       {"id":"main_tag",
         "multiple":false,
