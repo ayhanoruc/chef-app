@@ -365,3 +365,65 @@ single_url_sitemap = {
 }
 
 
+# TEMPLATE GENERATOR :
+# Input: Dictionary of URL lists with names like "{tag}_maintag_urls" or "{tag}_single_urls"
+url_lists = {
+    "drinks_maintag_urls": [
+        "https://www.allrecipes.com/recipes/134/drinks/coffee/",
+        "https://www.allrecipes.com/recipes/136/drinks/punch/",
+        "https://www.allrecipes.com/recipes/137/drinks/shakes-and-floats/",
+        "https://www.allrecipes.com/recipes/138/drinks/smoothies/"
+    ],
+    "appetizers_single_urls": [
+        "https://www.allrecipes.com/recipes/1899/world-cuisine/asian/chinese/appetizers/",
+        "https://www.allrecipes.com/recipes/1904/appetizers-and-snacks/appetizers/asian/",
+    ]
+}
+
+# Initialize an empty list to store the sitemap templates
+sitemap_templates = []
+
+# Define the templates
+main_tag_sitemap = {
+    # ... (Your existing main_tag_sitemap template here)
+}
+
+single_url_sitemap = {
+    # ... (Your existing single_url_sitemap template here)
+}
+
+# Iterate over the input URL lists and generate sitemap templates
+for list_name, url_list in url_lists.items():
+    # Determine the type of template based on the list_name
+    if "maintag" in list_name:
+        template = main_tag_sitemap.copy()
+    elif "single" in list_name:
+        template = single_url_sitemap.copy()
+    else:
+        print(f"Unknown template type for list '{list_name}'")
+        continue
+
+    # Extract the tag name from the list_name
+    tag = list_name.split("_")[0]
+
+    # Iterate through each URL in the list
+    for url in url_list:
+        # Extract the second part of sitemap_id from the URL
+        second_part_sitemap_id = url.split('/')[-2]
+
+        # Generate the first part of sitemap_id from the tag
+        first_part_sitemap_id = tag
+
+        # Combine the first and second parts to create the sitemap_id
+        sitemap_id = f"{first_part_sitemap_id}_{second_part_sitemap_id}"
+
+        # Update sitemap_id and entry_url in the template
+        template["sitemap"]["_id"] = sitemap_id
+        template["sitemap"]["startUrl"] = [url]
+
+        # Append the generated sitemap template to the list
+        sitemap_templates.append(template)
+
+# Print the generated sitemap templates
+for template in sitemap_templates:
+    print(template)
