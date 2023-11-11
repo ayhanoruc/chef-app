@@ -210,21 +210,16 @@ if __name__ == "__main__":
     ingredients_list = ["2 cups of flour", "1 cup of sugar", "1 teaspoon of vanilla extract"]
     search_query = ' '.join(ingredients_list)
     
-    results = vector_retriever.similarity_search(query=qry, k=10)
+    results = vector_retriever.similarity_search(query=search_query, k=10)
     #we can use:  filter (Optional[Dict[str, str]]) – Filter by metadata. Defaults to None.
     
     #[result[0].page_content for result in results]
     #result = list of tuples: each tuple contains a document and its similarity score,
     # each document is a tuple of (page_content, metadata)
-    print([result[0].page_content for result in results] )
+    print(type(results[0]), results   )
     print("\n\n")
-    print(results[0][0].metadata.__dir__())
-    print(results[0][0].metadata.keys())
-    print(results[0][0].metadata.get("recipe_name"), end="\n")
-    print([result[0].metadata.get("recipe_card-href") for result in results])
+    """ rint(results[0][0].metadata.__dir__())
+        print(results[0][0].metadata.keys())
+        print(results[0][0].metadata.get("recipe_name"), end="\n")
+        print([result[0].metadata.get("recipe_card-href") for result in results]) """
     print("DONE")
-
-
-
-
-

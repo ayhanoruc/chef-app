@@ -9,7 +9,7 @@ this is the future of COOKING-COPILOT APPS
         total_calory, detailed_nutrition_info, [total_time, cook_time, prep_time, additional_time, servings]: may be we should scrape the table 
         as a single element than parse and convert them into numeric format to make ready for filtering later, via regex. 
 
-- [ ] data scraping :
+- [X] data scraping :
     - open 10 opera tabs, open webscraping import sitemap tabs
     - for each url and its type: main or single , generate individual sitemaps.
     - for each opened tab, just import these sitemaps and start the scraping asyncly: 20 (2window*10tabs)tabs -> 400 recipes/min -> 24k recipes/hr
