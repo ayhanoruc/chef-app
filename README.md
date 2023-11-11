@@ -10,6 +10,7 @@ this is the future of COOKING-COPILOT APPS
         as a single element than parse and convert them into numeric format to make ready for filtering later, via regex. 
 
 - [ ] data scraping :
+    - recipe nutrition_details'i empty olan satırları dahil etme.
     - open 10 opera tabs, open webscraping import sitemap tabs
     - for each url and its type: main or single , generate individual sitemaps.
     - for each opened tab, just import these sitemaps and start the scraping asyncly: 20 (2window*10tabs)tabs -> 400 recipes/min -> 24k recipes/hr
