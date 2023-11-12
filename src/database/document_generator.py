@@ -47,9 +47,9 @@ class JsonToDocument:
         # Process each recipe in the JSON data
         for recipe in json_data:
             metadata = self.extract_metadata(recipe)
-            print(type(metadata))
+            #print(type(metadata))
             ingredients_list = self.extract_ingredients_text(recipe)
-            ingredients_text = " ".join(ingredients_list) # concatenate list items to a string, we may use "|" to seperate ingredient elements.
+            ingredients_text = "|".join(ingredients_list) # concatenate list items to a string, we may use "|" to seperate ingredient elements.
             
             # Construct a new Document object
             new_document = Document(
@@ -64,16 +64,35 @@ class JsonToDocument:
 
     def extract_metadata(self, recipe: Dict) -> Dict:
         """Extract the metadata from a recipe."""
+        # Update the fields to match the keys in the JSON structure
+        metadata_fields = ['recipe_card-href', 'recipe_tags_formatted', 'recipe_name', 'recipe_img_url-src',
+                        'recipe_details_formatted', 'recipe_ingredients_formatted', 
+                        'recipe_directions_formatted', 'recipe_nutrition_details_formatted']
+
+        # Extract metadata and handle missing fields by setting them to None
+        metadata = {field: str(recipe.get(field, "None")) for field in metadata_fields}
+
+        print("Metadata is extracted successfully!")
+        return metadata
+
+    """def extract_metadata(self, recipe: Dict) -> Dict:
+        #Extract the metadata from a recipe.
         # the fields to be included in the metadata
         metadata_fields = ['recipe_card','recipe_card-href', 'recipe_tags','recipe_name','recipe_servings', 
                             'recipe_prep_time', 'recipe_cook_time', 'recipe_total_time','recipe_nutrition','recipe_directions']
         
         # we may handle edge cases here, e.g. if a field is missing: replace with NULL| raise exception ???
         print("metadata is extracted successfully!")
-        return {field: recipe[field] for field in metadata_fields if field in recipe}
+        return {field: recipe[field] for field in metadata_fields if field in recipe} """
 
     def extract_ingredients_text(self, recipe: Dict) -> List:
-        """Extract and concatenate ingredients text: list of dicts from a recipe."""
+        """Extract ingredients text: list of strings from a recipe."""
+        # Directly return the list of ingredients from the recipe
+        return recipe.get('recipe_ingredients_formatted', [])
+
+
+    """ def extract_ingredients_text(self, recipe: Dict) -> List:
+        #Extract and concatenate ingredients text: list of dicts from a recipe.
         # Concatenate ingredients into a single text string
         ingredients: List[dict] = recipe.get('recipe_ingredients', [])
 
@@ -95,4 +114,6 @@ class JsonToDocument:
 
         #print(final_ingredients_list)
 
-        return final_ingredients_list
+        return final_ingredients_list """
+
+

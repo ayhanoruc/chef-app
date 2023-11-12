@@ -1,0 +1,2 @@
+RECIPE_DETAILS_FORMATTER:
+  "Given the following dictionary with incorrectly formatted recipe details, please reformat it correctly. Separate the combined values into their appropriate keys and ensure all entries are accurate. If you can calculate, do the calculation, if the information does not exist, leave it as 'None'"

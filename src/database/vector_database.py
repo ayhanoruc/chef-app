@@ -88,7 +88,7 @@ class VectorRetriever:
         """
         return list(set(raw_text_list))
 
-    def similarity_search(self, query: Union[str, List[str]], k:int = 3, filter:Dict[str,str]=None )->List[Tuple[str, float]]:
+    def similarity_search(self, query: Union[str, List[str]], k:int = 3, filter:Dict[str,str]=None, where:Dict[str,str]=None )->List[Tuple[str, float]]:
 
         """
         Performs a similarity search on the given query and filters the results by metadata.
@@ -106,7 +106,7 @@ class VectorRetriever:
 
         if isinstance(query, str):
             try:
-                results = self.vector_store.similarity_search_with_score(query, k=k, filter = filter) # ADD filter by metadata option
+                results = self.vector_store.similarity_search_with_score(query, k=k, where=where,) # ADD filter by metadata option
                 print("similarity search is performed successfully!")
                 return results
             except Exception as e:
@@ -162,11 +162,11 @@ if __name__ == "__main__":
     encode_kwargs = {'normalize_embeddings': False}
 
 
-    persist_directory = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\vector_db"
+    persist_directory = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\vector_db_2"
     os.makedirs(persist_directory, exist_ok=True)
     collection_name= "recipe_vdb"
 
-    json_file_path = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\cusine\italian\italian-desserts.json"
+    #json_file_path = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\cusine\italian\italian-desserts.json"
 
     vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
     
@@ -175,48 +175,79 @@ if __name__ == "__main__":
     #single document
     #documents = json_to_document.process_json_document(file_path=json_file_path)
 
-    recipes_dir_1 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes"
-    recipes_dir_2 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\cusine"
+    recipes_dir_1 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\new_data\2foodnet_formatted"
+    #recipes_dir_2 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\cusine"
 
-    """ 
-    categories_1 = os.listdir(recipes_dir_1)
-    categories_2 = os.listdir(recipes_dir_2)
+
+    """     categories_1 = os.listdir(recipes_dir_1)
     documents = []
 
-    for category in categories_1:
-        file_names = [name for name in  os.listdir(os.path.join(recipes_dir_1,category)) if name.endswith(".json")]
-        print(category,"/////////////////////")
-        for file in file_names:
-            
-            json_file_path = os.path.join(recipes_dir_1,category,file)
-            documents.extend(json_to_document.process_json_document(file_path=json_file_path))
-
-    # recipes from cusine folder
-    for category in categories_2:
-        file_names = [name for name in  os.listdir(os.path.join(recipes_dir_2,category)) if name.endswith(".json")]
-        print(category,"/////////////////////")
-        for file in file_names:
-            
-            json_file_path = os.path.join(recipes_dir_2,category,file)
-            documents.extend(json_to_document.process_json_document(file_path=json_file_path))
+    for category in [category for category in categories_1 if category.endswith(".json")]:            
+        json_file_path = os.path.join(recipes_dir_1,category)
+        documents.extend(json_to_document.process_json_document(file_path=json_file_path))
 
 
-    print(len(documents),"documents found!", type(documents)) # created database from 12456 documents in 165 seconds. 
-    """
+
+    print(len(documents),"documents found!", type(documents)) # created database from 12456 documents in 165 seconds.  """
+
+
+####################### RETRIEVAL ###############################################
+
 
     # since overwrite is set to False, it will initialize the vector store as retriever.pass documents=None
     vector_retriever.initialize_vector_store(persist_directory=persist_directory, documents=None, collection_name=collection_name)
     
-    ingredients_list = ["2 cups of flour", "1 cup of sugar", "1 teaspoon of vanilla extract"]
+    ingredients_list = [
+            "12 ounces Breakfast Potatoes, recipe follows",
+            "6 pieces Fry Bread, recipe follows",
+            "12 eggs",
+            "12 ounces ground beef",
+            "Blackening spice, or curry spice and fennel seeds",
+            "Blackening spice, or curry spice and fennel seeds",
+            "12 ounces black beans",
+            "6 ounces roasted red pepper, sliced",
+            "6 ounces red onion, chopped",
+            "12 ounces salsa",
+            "6 ounces Monterey Jack cheese",
+            "1 1\/2 pounds medium red potatoes",]
+
     search_query = ' '.join(ingredients_list)
-    
-    results = vector_retriever.similarity_search(query=search_query, k=10)
+
+
+
+    where_document_condition_1 = {
+    "$contains": "Pancake" }
+
+    # Construct the where_document condition with an $and operator
+    where_document_condition_2 = {
+        "$and": [
+            {"recipe_tags": {"$contains": "Pancake"}},
+            {"recipe_tags": {"$contains": "Breakfast"}}
+        ]
+    }
+    where_document_condition_3 = {
+    "recipe_nutrition_details_formatted.Calories": {"$lte": 400}}
+
+    # Construct the where condition with an $and operator to combine multiple conditions
+    where_document_condition_4 = {
+        "$and": [
+            {"recipe_tags_formatted": {"$contains": "Taco"}},  # Filter by tag containing "Pancake"
+            {"recipe_tags_formatted": {"$contains": "American"}},  # Filter by tag containing "Breakfast"
+            #{"recipe_nutrition_details_formatted.Calories": {"$lte": 400}},  # Filter by max 400 calories
+            {"recipe_ingredients_formatted": {"$contains": "olive oil"}}  # Filter by ingredient containing "olive oil"
+        ]
+}
+
+# Validate the
+
+
+    results = vector_retriever.similarity_search(query=search_query, k=3, where=where_document_condition_4)
     #we can use:  filter (Optional[Dict[str, str]]) – Filter by metadata. Defaults to None.
     
     #[result[0].page_content for result in results]
     #result = list of tuples: each tuple contains a document and its similarity score,
     # each document is a tuple of (page_content, metadata)
-    print(type(results[0]), results   )
+    print(type(results), results   )
     print("\n\n")
     """ rint(results[0][0].metadata.__dir__())
         print(results[0][0].metadata.keys())
