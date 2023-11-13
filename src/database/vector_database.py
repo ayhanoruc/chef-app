@@ -166,37 +166,41 @@ if __name__ == "__main__":
     os.makedirs(persist_directory, exist_ok=True)
     collection_name= "recipe_vdb"
 
-    #json_file_path = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\cusine\italian\italian-desserts.json"
+    
 
     vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
     
     json_to_document = JsonToDocument()
 
     #single document
+    #json_file_path = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\cusine\italian\italian-desserts.json"
     #documents = json_to_document.process_json_document(file_path=json_file_path)
 
-    recipes_dir_1 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\new_data\2foodnet_formatted"
+    recipes_dir_1 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\new_data\allrecipescom"
     #recipes_dir_2 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\cusine"
 
 
     """     categories_1 = os.listdir(recipes_dir_1)
     documents = []
 
-    for category in [category for category in categories_1 if category.endswith(".json")]:            
-        json_file_path = os.path.join(recipes_dir_1,category)
-        documents.extend(json_to_document.process_json_document(file_path=json_file_path))
+    for category in categories_1:
+        file_list = os.listdir(os.path.join(recipes_dir_1, category))
+        for file in [file for file in file_list if file.endswith(".json")]:
+            json_file_path = os.path.join(recipes_dir_1, category, file)
+            documents.extend(json_to_document.process_json_document(file_path=json_file_path))
 
 
 
     print(len(documents),"documents found!", type(documents)) # created database from 12456 documents in 165 seconds.  """
 
 
-####################### RETRIEVAL ###############################################
+    ####################### RETRIEVAL ###############################################
 
 
     # since overwrite is set to False, it will initialize the vector store as retriever.pass documents=None
     vector_retriever.initialize_vector_store(persist_directory=persist_directory, documents=None, collection_name=collection_name)
-    
+    #vector_retriever.add_new_documents(documents=documents)
+
     ingredients_list = [
             "12 ounces Breakfast Potatoes, recipe follows",
             "6 pieces Fry Bread, recipe follows",
@@ -214,7 +218,7 @@ if __name__ == "__main__":
     search_query = ' '.join(ingredients_list)
 
 
-
+    # source_code : https://github.com/chroma-core/chroma/blob/main/chromadb/api/types.py#L138
     where_document_condition_1 = {
     "$contains": "Pancake" }
 
@@ -238,16 +242,17 @@ if __name__ == "__main__":
         ]
 }
 
-# Validate the
+    # Validate the
 
 
-    results = vector_retriever.similarity_search(query=search_query, k=3, where=where_document_condition_4)
+    results = vector_retriever.similarity_search(query=search_query, k=10, where=where_document_condition_3)
+
     #we can use:  filter (Optional[Dict[str, str]]) – Filter by metadata. Defaults to None.
     
     #[result[0].page_content for result in results]
     #result = list of tuples: each tuple contains a document and its similarity score,
     # each document is a tuple of (page_content, metadata)
-    print(type(results), results   )
+    print(type(results), results )
     print("\n\n")
     """ rint(results[0][0].metadata.__dir__())
         print(results[0][0].metadata.keys())
