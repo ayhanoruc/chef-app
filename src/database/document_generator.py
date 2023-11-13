@@ -46,15 +46,15 @@ class JsonToDocument:
 
         # Process each recipe in the JSON data
         for recipe in json_data:
-            metadata = self.extract_metadata(recipe)
+            metadata, tags = self.extract_metadata(recipe)
             #print(type(metadata))
             ingredients_list = self.extract_ingredients_text(recipe)
             ingredients_text = "|".join(ingredients_list) # concatenate list items to a string, we may use "|" to seperate ingredient elements.
-            
+            document_text = f"{ingredients_text}\nrecipe_tags_formatted:{tags}" # concatenate metadata and ingredients_text for tag filtering during retrieval.
             # Construct a new Document object
             new_document = Document(
                 metadata=metadata,
-                page_content=ingredients_text,)
+                page_content=document_text,)
                 # add additional fields, if necessary
 
             documents.append(new_document) # we use append since we are adding documents one by one
@@ -71,9 +71,10 @@ class JsonToDocument:
 
         # Extract metadata and handle missing fields by setting them to None
         metadata = {field: str(recipe.get(field, "None")) for field in metadata_fields}
+        tags = recipe.get('recipe_tags_formatted', "None")
 
         print("Metadata is extracted successfully!")
-        return metadata
+        return metadata, tags
 
     """def extract_metadata(self, recipe: Dict) -> Dict:
         #Extract the metadata from a recipe.

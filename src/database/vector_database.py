@@ -88,7 +88,7 @@ class VectorRetriever:
         """
         return list(set(raw_text_list))
 
-    def similarity_search(self, query: Union[str, List[str]], k:int = 3, filter:Dict[str,str]=None, where:Dict[str,str]=None )->List[Tuple[str, float]]:
+    def similarity_search(self, query: Union[str, List[str]], k:int = 3, filter:Dict[str,str]=None, where:Dict[str,str]=None , where_document:Dict[str,str]=None)->List[Tuple[str, float]]:
 
         """
         Performs a similarity search on the given query and filters the results by metadata.
@@ -106,9 +106,12 @@ class VectorRetriever:
 
         if isinstance(query, str):
             try:
-                results = self.vector_store.similarity_search_with_score(query, k=k, where=where,) # ADD filter by metadata option
+                print(f"query: {query} \n k: {k} \n filter: {filter} \n where: {where} \n where_document: {where_document}")
+                results = self.vector_store.max_marginal_relevance_search(query, k=k, fetch=k, lambda_mult= 0.7, where= where, filter=filter, where_document=where_document)
                 print("similarity search is performed successfully!")
-                return results
+                print(results)
+                #return results
+                return self.post_process_results(results)
             except Exception as e:
                 print("similarity search failed with error: ", e)
                 return None 
@@ -131,6 +134,31 @@ class VectorRetriever:
         print("new documents added to the vector store ids:", ids)
         return ids
 
+
+    def post_process_results(self, search_results: List[Document]) -> List[Dict]:
+        if search_results is None:
+            return "No results found."
+        print("search results:\n", search_results )
+        formatted_results = []
+
+        for document in search_results:
+            try:
+                recipe = {
+                    'recipe_name': document.metadata.get('recipe_name', 'No name available'),
+                    'recipe_ingredients': document.metadata.get('recipe_ingredients_formatted', 'No ingredients available'),
+                    'recipe_directions': document.metadata.get('recipe_directions_formatted', 'No directions available'),
+                    'recipe_nutrition_details': document.metadata.get('recipe_nutrition_details_formatted', 'No nutrition details available'),
+                    'recipe_tags': document.metadata.get('recipe_tags_formatted', 'No tags available'),
+                    'recipe_image_url': document.metadata.get('recipe_img_url-src', 'No image available'),
+                    'recipe_url': document.metadata.get('recipe_card-href', 'No URL available')
+                }
+                formatted_results.append(recipe)
+            except AttributeError:
+                # Handle the case where the document does not have the expected attributes
+                print("Missing attribute in document")
+        
+
+        return formatted_results
 
 
 
@@ -162,100 +190,91 @@ if __name__ == "__main__":
     encode_kwargs = {'normalize_embeddings': False}
 
 
-    persist_directory = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\vector_db_2"
+    persist_directory = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\vector_db_4"
     os.makedirs(persist_directory, exist_ok=True)
-    collection_name= "recipe_vdb"
+    collection_name= "recipe_collection"
 
     
 
-    vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
     
-    json_to_document = JsonToDocument()
+    
 
     #single document
     #json_file_path = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\cusine\italian\italian-desserts.json"
     #documents = json_to_document.process_json_document(file_path=json_file_path)
 
     recipes_dir_1 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\new_data\allrecipescom"
-    #recipes_dir_2 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\cusine"
+    recipes_dir_2 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\new_data\2foodnet_formatted"
 
+    """ json_to_document = JsonToDocument()
 
-    """     categories_1 = os.listdir(recipes_dir_1)
+    categories_1 = os.listdir(recipes_dir_1)
     documents = []
 
+    # allrecipes.com
     for category in categories_1:
         file_list = os.listdir(os.path.join(recipes_dir_1, category))
         for file in [file for file in file_list if file.endswith(".json")]:
             json_file_path = os.path.join(recipes_dir_1, category, file)
             documents.extend(json_to_document.process_json_document(file_path=json_file_path))
 
+    # foodnet.com
+    file_list = os.listdir(recipes_dir_2)
+    for file in [file for file in file_list if file.endswith(".json")]:
+        json_file_path = os.path.join(recipes_dir_2, file)
+        documents.extend(json_to_document.process_json_document(file_path=json_file_path))
 
 
-    print(len(documents),"documents found!", type(documents)) # created database from 12456 documents in 165 seconds.  """
+    print(len(documents),"documents found!", type(documents)) # created database from 12456 documents in 165 seconds. """
 
+    ####################### VECTORSTORE & RETRIEVAL ###############################################
 
-    ####################### RETRIEVAL ###############################################
-
-
+    vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
     # since overwrite is set to False, it will initialize the vector store as retriever.pass documents=None
     vector_retriever.initialize_vector_store(persist_directory=persist_directory, documents=None, collection_name=collection_name)
     #vector_retriever.add_new_documents(documents=documents)
 
-    ingredients_list = [
-            "12 ounces Breakfast Potatoes, recipe follows",
-            "6 pieces Fry Bread, recipe follows",
-            "12 eggs",
-            "12 ounces ground beef",
-            "Blackening spice, or curry spice and fennel seeds",
-            "Blackening spice, or curry spice and fennel seeds",
-            "12 ounces black beans",
-            "6 ounces roasted red pepper, sliced",
-            "6 ounces red onion, chopped",
-            "12 ounces salsa",
-            "6 ounces Monterey Jack cheese",
-            "1 1\/2 pounds medium red potatoes",]
-
-    search_query = ' '.join(ingredients_list)
-
-
-    # source_code : https://github.com/chroma-core/chroma/blob/main/chromadb/api/types.py#L138
-    where_document_condition_1 = {
-    "$contains": "Pancake" }
-
-    # Construct the where_document condition with an $and operator
-    where_document_condition_2 = {
-        "$and": [
-            {"recipe_tags": {"$contains": "Pancake"}},
-            {"recipe_tags": {"$contains": "Breakfast"}}
+    ingredients_list = [ "cup butter",
+            " plain yogurt",
+            "sugar",
+            "1  egg",
+            "vanilla "
         ]
-    }
-    where_document_condition_3 = {
+
+
+    #where_document: Optional[Dict[str, str]]
+    # source_code : https://github.com/chroma-core/chroma/blob/main/chromadb/api/types.py#L138
+
+    
+    where_condition = {
     "recipe_nutrition_details_formatted.Calories": {"$lte": 400}}
 
-    # Construct the where condition with an $and operator to combine multiple conditions
-    where_document_condition_4 = {
+
+    where_document_condition_1 = {
+        "$contains": "Turkish"}
+
+    where_document_condition_2 ={
         "$and": [
-            {"recipe_tags_formatted": {"$contains": "Taco"}},  # Filter by tag containing "Pancake"
-            {"recipe_tags_formatted": {"$contains": "American"}},  # Filter by tag containing "Breakfast"
-            #{"recipe_nutrition_details_formatted.Calories": {"$lte": 400}},  # Filter by max 400 calories
-            {"recipe_ingredients_formatted": {"$contains": "olive oil"}}  # Filter by ingredient containing "olive oil"
+            {"$contains": "Dessert"},
+            {"$contains": "Healthy"}
         ]
-}
-
-    # Validate the
+    }
 
 
-    results = vector_retriever.similarity_search(query=search_query, k=10, where=where_document_condition_3)
+    # Perform a similarity search
+    results = vector_retriever.similarity_search(query=ingredients_list, k=4, where_document = where_document_condition_1)
 
-    #we can use:  filter (Optional[Dict[str, str]]) – Filter by metadata. Defaults to None.
+
     
-    #[result[0].page_content for result in results]
-    #result = list of tuples: each tuple contains a document and its similarity score,
-    # each document is a tuple of (page_content, metadata)
-    print(type(results), results )
-    print("\n\n")
-    """ rint(results[0][0].metadata.__dir__())
-        print(results[0][0].metadata.keys())
-        print(results[0][0].metadata.get("recipe_name"), end="\n")
-        print([result[0].metadata.get("recipe_card-href") for result in results]) """
+    for result in results:
+        #print(result)
+        #print(type(result))
+        print(json.dumps(result, indent=4))
+        print("\n\n")
+
+
+    # Document: (page_content, metadata) where metadata: dict
+    """ print(results[0].page_content)
+    print(results[0].metadata.keys())
+    print(results[0].metadata["recipe_name"]) """
     print("DONE")
