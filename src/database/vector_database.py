@@ -2,13 +2,13 @@ from typing import List, Tuple, Union
 import json 
 from langchain.schema.document import Document
 from langchain.embeddings import HuggingFaceEmbeddings, SentenceTransformerEmbeddings
-from langchain.vectorstores import Chroma
+from langchain.vectorstores import Chroma, Pinecone
+import pinecone
 from typing import List,Tuple ,Union, Any, Dict
 import os 
 import ast
 from src.database.document_generator import JsonToDocument
-
-
+from dotenv import load_dotenv
 
 
 class VectorRetriever:
@@ -76,10 +76,29 @@ class VectorRetriever:
         else:
             # if user wants to use an existing vector store as retriever. user doesnot need to pass any documents.
             self.vector_store = Chroma(persist_directory=persist_directory, embedding_function=self.embedder, collection_name=collection_name)
-            
-            
 
-        print("vector store initialized successfully, and ready for retrieval!")
+        print("chroma vector store initialized successfully, and ready for retrieval!")
+
+
+
+    def initalize_pinecone_store(self,index_name:str= "chef-app",  documents:List[Document]=None, ):
+        load_dotenv()
+        PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
+        PINECONE_API_ENV = os.getenv('PINECONE_API_ENV')
+        
+        pinecone.init(
+        api_key=PINECONE_API_KEY, 
+        environment=PINECONE_API_ENV )
+
+        index_name = "chef-app"
+
+        if documents:
+            self.vector_store = Pinecone.from_documents(documents, self.embedder, index_name=index_name) 
+        else: 
+            self.vector_store = Pinecone.from_existing_index(index_name=index_name, embedding=self.embedder)
+
+        print("pinecone vector store initialized successfully, and ready for retrieval!")
+
 
     @staticmethod
     def drop_duplicates(raw_text_list):
@@ -87,6 +106,8 @@ class VectorRetriever:
         drops duplicates from a list of strings
         """
         return list(set(raw_text_list))
+
+
 
     def similarity_search(self, query: Union[str, List[str]], k:int = 3, filter:Dict[str,str]=None, where:Dict[str,str]=None , where_document:Dict[str,str]=None)->List[Tuple[str, float]]:
 
@@ -106,11 +127,12 @@ class VectorRetriever:
 
         if isinstance(query, str):
             try:
-                print(f"query: {query} \n k: {k} \n filter: {filter} \n where: {where} \n where_document: {where_document}")
+                #print(f"query: {query} \n k: {k} \n filter: {filter} \n where: {where} \n where_document: {where_document}")
                 results = self.vector_store.max_marginal_relevance_search(query, k=k, fetch=k, lambda_mult= 0.7, where= where, filter=filter, where_document=where_document)
-                print("similarity search is performed successfully!")
-                print(results)
+                #print("similarity search is performed successfully!")
+                #print(results)
                 #return results
+                print(type(results))
                 return self.post_process_results(results)
             except Exception as e:
                 print("similarity search failed with error: ", e)
@@ -138,7 +160,7 @@ class VectorRetriever:
     def post_process_results(self, search_results: List[Document]) -> List[Dict]:
         if search_results is None:
             return "No results found."
-        print("search results:\n", search_results )
+        #print("search results:\n", search_results )
         formatted_results = []
 
         for document in search_results:
@@ -202,11 +224,11 @@ if __name__ == "__main__":
     #single document
     #json_file_path = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\cusine\italian\italian-desserts.json"
     #documents = json_to_document.process_json_document(file_path=json_file_path)
-
+    
     recipes_dir_1 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\new_data\allrecipescom"
     recipes_dir_2 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\new_data\2foodnet_formatted"
-
-    """ json_to_document = JsonToDocument()
+    """
+    json_to_document = JsonToDocument()
 
     categories_1 = os.listdir(recipes_dir_1)
     documents = []
@@ -225,15 +247,22 @@ if __name__ == "__main__":
         documents.extend(json_to_document.process_json_document(file_path=json_file_path))
 
 
-    print(len(documents),"documents found!", type(documents)) # created database from 12456 documents in 165 seconds. """
+    print(len(documents),"documents found!", type(documents)) # created database from 12456 documents in 165 seconds.  """
 
     ####################### VECTORSTORE & RETRIEVAL ###############################################
 
     vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
+
+    #using CHROMA
     # since overwrite is set to False, it will initialize the vector store as retriever.pass documents=None
-    vector_retriever.initialize_vector_store(persist_directory=persist_directory, documents=None, collection_name=collection_name)
+    #vector_retriever.initialize_vector_store(persist_directory=persist_directory, documents=None, collection_name=collection_name)
     #vector_retriever.add_new_documents(documents=documents)
 
+    #using PINECONE
+    vector_retriever.initalize_pinecone_store(index_name="chef-app")# dont pass documents if you want to initialize an existing vector store
+    
+
+    
     ingredients_list = [ "cup butter",
             " plain yogurt",
             "sugar",
@@ -255,14 +284,14 @@ if __name__ == "__main__":
 
     where_document_condition_2 ={
         "$and": [
-            {"$contains": "Dessert"},
+            {"$contains": "dinner"},
             {"$contains": "Healthy"}
         ]
     }
 
 
     # Perform a similarity search
-    results = vector_retriever.similarity_search(query=ingredients_list, k=4, where_document = where_document_condition_1)
+    results = vector_retriever.similarity_search(query=ingredients_list, k=10, where_document = where_document_condition_2)
 
 
     

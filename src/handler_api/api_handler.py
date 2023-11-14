@@ -1,16 +1,19 @@
 import json
-import gzip
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Query
 from fastapi.responses import JSONResponse
 import uvicorn
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import Message, ASGIApp
+
 from pydantic import BaseModel
+
+
+import asyncio 
 
 from src.database.vector_database import VectorRetriever
 from typing import List, Dict 
 
-import asyncio ## use this 
+
+
+
 
 model_name = "sentence-transformers/all-MiniLM-L6-v2"
 model_kwargs = {'device': 'cpu'}
@@ -21,18 +24,16 @@ persist_directory = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\vector_db_4"
 collection_name= "recipe_collection"
 
 #INITIALIZE the VECTOR RETRIEVER and make it ready as a global variable
-vector_retriever = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
-vector_retriever.initialize_vector_store(persist_directory=persist_directory, documents=None, collection_name=collection_name)
-print("vector retriever initialized successfully!")
-
-# Dependency function
-def get_vector_retriever():
-    return vector_retriever
+vector_retriever_chroma = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
+vector_retriever_chroma.initialize_vector_store(persist_directory=persist_directory, documents=None, collection_name=collection_name)
+print("chroma vector retriever initialized successfully!")
 
 
-app = FastAPI()
+vector_retriever_pinecone = VectorRetriever(model_name = model_name, model_kwargs= model_kwargs, encode_kwargs=encode_kwargs, overwrite=False)
+vector_retriever_pinecone.initalize_pinecone_store(index_name="chef-app")
+print("pinecone vector retriever initialized successfully!")
 
-
+# this will contain the preferences of the user
 params= {
 
     "ingredients_list":[
@@ -42,20 +43,27 @@ params= {
         "1  egg",
         "vanilla "
     ],
-    "recipe_tags": ["Dessert", "Healthy"],# this key will contain the preferences of the user
-
+    "recipe_tags": ["Dessert", "Healthy"],
 }
 
-def find_recipe(ingredients_list:List,k:int = 3, filter:Dict[str, str]=None, where:Dict[str, str]=None, where_document:Dict=None)-> List[Dict]:
-    """
-    this should handle metadata filtering and similarity search
-    then returns the most relevant documents
-    """
-    vector_retriever = get_vector_retriever()
-    results = vector_retriever.similarity_search(query=ingredients_list, k=4, filter = filter , where = where, where_document = where_document)
-    return results
+
+#pydantic data structure for the request payloads
+class RecipeRequest(BaseModel):
+    ingredients_list: List[str]
+    recipe_tags: List[str]
 
 
+# Dependency function for chroma
+def get_vector_retriever_chroma():
+    return vector_retriever_chroma
+
+# Dependency function for pinecone
+def get_vector_retriever_pinecone():
+    return vector_retriever_pinecone
+
+
+
+app = FastAPI()
 
 @app.get("/home")
 async def test_endpoint():
@@ -66,10 +74,65 @@ async def test_endpoint():
 
 
 
-class RecipeRequest(BaseModel):
-    ingredients_list: List[str]
-    recipe_tags: List[str]
+### ASYNC ### 
+async def find_recipe_async(ingredients_list: List, k: int = 3, filter: Dict[str, str] = None, where: Dict[str, str] = None, where_document: Dict = None) -> List[Dict]:
+    """
+    Asynchronous function to handle metadata filtering and similarity search,
+    then returns the most relevant documents.
+    """
+    vector_retriever = get_vector_retriever_pinecone() # take this as parameter
+    #vector_retriever = get_vector_retriever_chroma()
+    # Asynchronously perform the similarity search
+    results = await asyncio.to_thread(
+        vector_retriever.similarity_search,
+        query=ingredients_list,
+        k=k,
+        filter=filter,
+        where=where,
+        where_document=where_document
+    )
+    return results
 
+
+@app.post("/get-recipe")
+async def get_recipe(request_body: RecipeRequest):
+    try:
+        ingredients_list = request_body.ingredients_list
+        recipe_tags = request_body.recipe_tags
+        where_document = {"$and": [{"$contains": tag} for tag in recipe_tags]}
+        
+        results = await find_recipe_async(ingredients_list=ingredients_list, where_document=where_document)
+        response_message = f"You have asked for a {' | '.join(recipe_tags)} meal, and you have the following items: {' | '.join(ingredients_list)}"
+        final_response = f"{response_message}\nHere are the results:\n{json.dumps(results, indent=2)}"
+        return JSONResponse({"response": final_response})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+# FOR Jmeter load testing
+"""@app.get("/get-recipes")
+async def get_recipes(ingredients_list: list = Query(...), recipe_tags: list = Query(...)):
+    try:
+        # The 'ingredients_list' and 'recipe_tags' are now list of strings provided as query parameters
+        where_document = {"$and": [{"$contains": tag} for tag in recipe_tags]}
+        
+        
+        results = await find_recipe_async(ingredients_list=ingredients_list, where_document=where_document)
+        
+        response_message = f"You have asked for a {' | '.join(recipe_tags)} meal, and you have the following items: {' | '.join(ingredients_list)}"
+        final_response = f"{response_message}\nHere are the results:\n{json.dumps(results, indent=2)}"
+        
+        return JSONResponse(content={"response": final_response})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")"""
+
+
+
+
+
+
+
+"""
 @app.post("/get-recipe")
 async def get_recipe(request_body: RecipeRequest):
 
@@ -87,7 +150,7 @@ async def get_recipe(request_body: RecipeRequest):
         return JSONResponse({"response":final_response})
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))"""
 
 
 
