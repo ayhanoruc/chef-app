@@ -1,13 +1,11 @@
 fastapi
 uvicorn
-PyPDF2
 python-dotenv
 openai
-python-multipart
-selectolax
 pandas 
 sentence-transformers
 langchain
 chromadb
+torch
 openpyxl
 pinecone-client

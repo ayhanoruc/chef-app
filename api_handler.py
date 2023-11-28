@@ -43,7 +43,7 @@ params= {
         "1  egg",
         "vanilla "
     ],
-    "recipe_tags": ["Dessert", "Healthy"],
+    "recipe_tags": ["Dessert", "Healthy"]
 }
 
 
@@ -152,7 +152,7 @@ async def get_recipe(request_body: RecipeRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))"""
 
-
+#THIS IS NOT NEEDED IN PRODUCTION
 
 if __name__ == "__main__":
     
