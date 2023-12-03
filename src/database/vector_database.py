@@ -227,6 +227,9 @@ if __name__ == "__main__":
     
     recipes_dir_1 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\new_data\allrecipescom"
     recipes_dir_2 = r"C:\Users\ayhan\Desktop\ChefApp\artifacts\recipes\new_data\2foodnet_formatted"
+
+
+    
     """
     json_to_document = JsonToDocument()
 
@@ -267,8 +270,7 @@ if __name__ == "__main__":
             " plain yogurt",
             "sugar",
             "1  egg",
-            "vanilla "
-        ]
+            "vanilla "]
 
 
     #where_document: Optional[Dict[str, str]]
@@ -303,7 +305,9 @@ if __name__ == "__main__":
 
 
     # Document: (page_content, metadata) where metadata: dict
-    """ print(results[0].page_content)
+    """ 
+    print(results[0].page_content)
     print(results[0].metadata.keys())
-    print(results[0].metadata["recipe_name"]) """
+    print(results[0].metadata["recipe_name"]) 
+    """
     print("DONE")

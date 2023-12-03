@@ -43,7 +43,7 @@ params= {
         "1  egg",
         "vanilla "
     ],
-    "recipe_tags": ["Dessert", "Healthy"]
+    "recipe_tags": ["Dessert", "Healthy", "Italian"]
 }
 
 
